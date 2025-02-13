@@ -9,7 +9,7 @@ require('@nomiclabs/hardhat-etherscan');
 // Export your private key as
 //       export PRIVKEY=0x.....
 const privateKey = process.env.PRIVKEY;
-const privateKeyDev = '0x99b3c12287537e38c90a9219d4cb074a89a16e9cdb20bf85728ebd97c343e342';
+const privateKeyDev = '0xa872f6cbd25a0e04a08b1e21098017a9e6194d101d75e13111f71410c59cd57f';
 
 module.exports = {
   defaultNetwork: 'hardhat',
@@ -17,16 +17,20 @@ module.exports = {
   networks: {
     hardhat: {},
 
-    moonbase: {
-      url: 'https://rpc.api.moonbase.moonbeam.network',
+    mandala: {
+      url: 'https://eth-rpc-tc9.aca-staging.network',
       accounts: [privateKey],
-      chainId: 1287,
+      chainId: 595,
+    },
+    mainnet: {
+      url: 'https://eth-rpc-acala.aca-api.network',
+      accounts: [privateKey],
+      chainId: 787,
     },
     dev: {
-      url: 'http://127.0.0.1:9933',
+      url: 'http://127.0.0.1:8545',
       accounts: [privateKeyDev],
-      network_id: '1281',
-      chainId: 1281,
+      chainId: 595,
     },
   },
   solidity: {
