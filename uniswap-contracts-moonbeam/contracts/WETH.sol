@@ -23,11 +23,13 @@ contract WETH {
     string public name     = "Wrapped Acala";
     string public symbol   = "WACA";
     uint8  public decimals = 18;
+    uint   public PRECISION = 10 ** 6;
 
     event  Approval(address indexed src, address indexed guy, uint wad);
     event  Transfer(address indexed src, address indexed dst, uint wad);
     event  Deposit(address indexed dst, uint wad);
     event  Withdrawal(address indexed src, uint wad);
+    event  Burned(address indexed src, uint wad);
 
     mapping (address => uint)                       public  balanceOf;
     mapping (address => mapping (address => uint))  public  allowance;
@@ -42,7 +44,11 @@ contract WETH {
     function withdraw(uint wad) public {
         require(balanceOf[msg.sender] >= wad);
         balanceOf[msg.sender] -= wad;
-        msg.sender.transfer(wad);
+
+        uint burned = wad % PRECISION;
+        uint new_wad = wad - burned;
+        msg.sender.transfer(new_wad);
+        emit Burned(msg.sender, burned);
         emit Withdrawal(msg.sender, wad);
     }
 
