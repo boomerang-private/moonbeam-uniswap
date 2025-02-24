@@ -15,6 +15,9 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
     address public immutable override factory;
     address public immutable override WETH;
 
+    uint PRECISION = 10 ** 6;
+    event  PrecisionAdjusted(uint originAmountETH, uint amountETH, uint precisionDigits);
+
     modifier ensure(uint deadline) {
         require(deadline >= block.timestamp, 'UniswapV2Router: EXPIRED');
         _;
@@ -92,6 +95,12 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
         );
         address pair = UniswapV2Library.pairFor(factory, token, WETH);
         TransferHelper.safeTransferFrom(token, msg.sender, pair, amountToken);
+
+        uint originAmountETH = amountETH;
+        uint precisionDigits = originAmountETH % PRECISION;
+        amountETH = originAmountETH - precisionDigits;
+        emit PrecisionAdjusted(originAmountETH, amountETH, precisionDigits);
+
         IWETH(WETH).deposit{value: amountETH}();
         assert(IWETH(WETH).transfer(pair, amountETH));
         liquidity = IUniswapV2Pair(pair).mint(to);
@@ -135,6 +144,12 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
             deadline
         );
         TransferHelper.safeTransfer(token, to, amountToken);
+
+        uint originAmountETH = amountETH;
+        uint precisionDigits = originAmountETH % PRECISION;
+        amountETH = originAmountETH - precisionDigits;
+        emit PrecisionAdjusted(originAmountETH, amountETH, precisionDigits);
+
         IWETH(WETH).withdraw(amountETH);
         TransferHelper.safeTransferETH(to, amountETH);
     }
@@ -187,6 +202,12 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
             deadline
         );
         TransferHelper.safeTransfer(token, to, IERC20(token).balanceOf(address(this)));
+
+        uint originAmountETH = amountETH;
+        uint precisionDigits = originAmountETH % PRECISION;
+        amountETH = originAmountETH - precisionDigits;
+        emit PrecisionAdjusted(originAmountETH, amountETH, precisionDigits);
+
         IWETH(WETH).withdraw(amountETH);
         TransferHelper.safeTransferETH(to, amountETH);
     }
@@ -278,6 +299,12 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
             path[0], msg.sender, UniswapV2Library.pairFor(factory, path[0], path[1]), amounts[0]
         );
         _swap(amounts, path, address(this));
+
+        uint originAmountETH = amounts[amounts.length - 1];
+        uint precisionDigits = originAmountETH % PRECISION;
+        amounts[amounts.length - 1] = originAmountETH - precisionDigits;
+        emit PrecisionAdjusted(originAmountETH, amounts[amounts.length - 1], precisionDigits);
+
         IWETH(WETH).withdraw(amounts[amounts.length - 1]);
         TransferHelper.safeTransferETH(to, amounts[amounts.length - 1]);
     }
@@ -295,6 +322,12 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
             path[0], msg.sender, UniswapV2Library.pairFor(factory, path[0], path[1]), amounts[0]
         );
         _swap(amounts, path, address(this));
+
+        uint originAmountETH = amounts[amounts.length - 1];
+        uint precisionDigits = originAmountETH % PRECISION;
+        amounts[amounts.length - 1] = originAmountETH - precisionDigits;
+        emit PrecisionAdjusted(originAmountETH, amounts[amounts.length - 1], precisionDigits);
+
         IWETH(WETH).withdraw(amounts[amounts.length - 1]);
         TransferHelper.safeTransferETH(to, amounts[amounts.length - 1]);
     }
@@ -309,6 +342,12 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
         require(path[0] == WETH, 'UniswapV2Router: INVALID_PATH');
         amounts = UniswapV2Library.getAmountsIn(factory, amountOut, path);
         require(amounts[0] <= msg.value, 'UniswapV2Router: EXCESSIVE_INPUT_AMOUNT');
+
+        uint originAmountETH = amounts[0];
+        uint precisionDigits = originAmountETH % PRECISION;
+        amounts[0] = originAmountETH - precisionDigits;
+        emit PrecisionAdjusted(originAmountETH, amounts[0], precisionDigits);
+
         IWETH(WETH).deposit{value: amounts[0]}();
         assert(IWETH(WETH).transfer(UniswapV2Library.pairFor(factory, path[0], path[1]), amounts[0]));
         _swap(amounts, path, to);
@@ -395,6 +434,12 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
         _swapSupportingFeeOnTransferTokens(path, address(this));
         uint amountOut = IERC20(WETH).balanceOf(address(this));
         require(amountOut >= amountOutMin, 'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT');
+
+        uint originAmountETH = amountOut;
+        uint precisionDigits = originAmountETH % PRECISION;
+        amountOut = originAmountETH - precisionDigits;
+        emit PrecisionAdjusted(originAmountETH, amountOut, precisionDigits);
+
         IWETH(WETH).withdraw(amountOut);
         TransferHelper.safeTransferETH(to, amountOut);
     }
